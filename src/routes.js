@@ -9,6 +9,58 @@ router.get('/', (req, res) => {
   res.status(200).json(students);
 });
 
+// --- ATTENTION: CES 2 ROUTES DOIVENT ÊTRE AVANT LE /:id ---
+
+// 6. GET /students/stats -> Objectif : Statistiques sur les étudiants
+router.get('/stats', (req, res) => {
+  if (students.length === 0) {
+    return res.status(200).json({ totalStudents: 0, averageGrade: 0, studentsByField: {}, bestStudent: null });
+  }
+
+  const totalStudents = students.length;
+  
+  // Calcul de la moyenne
+  const sumGrades = students.reduce((acc, student) => acc + student.grade, 0);
+  const averageGrade = parseFloat((sumGrades / totalStudents).toFixed(2));
+
+  // Répartition par filière
+  const studentsByField = students.reduce((acc, student) => {
+    acc[student.field] = (acc[student.field] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Recherche du meilleur étudiant
+  const bestStudent = students.reduce((best, student) => (student.grade > best.grade ? student : best), students[0]);
+
+  res.status(200).json({
+    totalStudents,
+    averageGrade,
+    studentsByField,
+    bestStudent
+  });
+});
+
+// 7. GET /students/search -> Objectif : Rechercher un étudiant par nom/prénom
+router.get('/search', (req, res) => {
+  const query = req.query.q; // On récupère "?q=..."
+
+  if (!query || query.trim() === "") {
+    return res.status(400).json({ erreur: "Le paramètre de recherche 'q' est absent ou vide" });
+  }
+
+  const lowerQuery = query.toLowerCase(); // insensible à la casse
+  
+  const results = students.filter(s => 
+    s.firstName.toLowerCase().includes(lowerQuery) || 
+    s.lastName.toLowerCase().includes(lowerQuery)
+  );
+
+  res.status(200).json(results);
+});
+
+// -----------------------------------------------------------
+
+
 // 2. GET /students/:id -> Objectif : Récupérer un étudiant précis
 router.get('/:id', (req, res) => {
   const paramId = req.params.id;
