@@ -1,0 +1,32 @@
+name: Pipeline CI
+
+# Quand est-ce que ce pipeline doit se lancer ?
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Les missions du serveur de Github
+jobs:
+  verification:
+    runs-on: ubuntu-latest # Un serveur Linux tout neuf
+
+    steps:
+    - name: 📥 Téléchargement de ton code
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Installation de Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # La version la plus stable
+        cache: 'npm'
+
+    - name: 📦 Installation des dépendances (Express, Jest, etc.)
+      run: npm install
+
+    - name: 🔍 Vérification de la propreté (Linter)
+      run: npm run lint
+
+    - name: 🧪 Validation des 15 tests automatisés
+      run: npm test
