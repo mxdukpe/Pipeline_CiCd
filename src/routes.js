@@ -75,5 +75,81 @@ router.post('/', (req, res) => {
   res.status(201).json(newStudent);
 });
 
+// 4. PUT /students/:id -> Objectif : Modifier un étudiant existant
+router.put('/:id', (req, res) => {
+  const paramId = parseInt(req.params.id);
+
+  if (isNaN(paramId)) {
+    return res.status(400).json({ erreur: "L'ID doit être un nombre valide" });
+  }
+
+  const studentIndex = students.findIndex(s => s.id === paramId);
+
+  // Règle 404 : L'ID n'existe pas
+  if (studentIndex === -1) {
+    return res.status(404).json({ erreur: "Étudiant non trouvé" });
+  }
+
+  const { firstName, lastName, email, grade, field } = req.body;
+
+  // Règle 400 : Les mêmes validations que le POST
+  if (!firstName || !lastName || !email || grade === undefined || !field) {
+    return res.status(400).json({ erreur: "Tous les champs sont obligatoires" });
+  }
+  if (firstName.length < 2 || lastName.length < 2) {
+    return res.status(400).json({ erreur: "Le prénom et nom doivent faire au moins 2 caractères" });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ erreur: "Format d'email invalide" });
+  }
+
+  // Règle 409 : L'email est pris par un AUTRE étudiant
+  const emailExists = students.find(s => s.email === email && s.id !== paramId);
+  if (emailExists) {
+    return res.status(409).json({ erreur: "Cet email est déjà pris par un autre étudiant" });
+  }
+  
+  if (typeof grade !== 'number' || grade < 0 || grade > 20) {
+    return res.status(400).json({ erreur: "La note (grade) doit être un nombre entre 0 et 20" });
+  }
+  
+  const validFields = ["informatique", "mathématiques", "physique", "chimie"];
+  if (!validFields.includes(field)) {
+    return res.status(400).json({ erreur: "Filière invalide" });
+  }
+
+  // Si tout est beau, on écrase l'ancien étudiant avec les nouvelles valeurs
+  const updatedStudent = { id: paramId, firstName, lastName, email, grade, field };
+  students[studentIndex] = updatedStudent;
+
+  // Code 200 OK
+  res.status(200).json(updatedStudent);
+});
+
+
+// 5. DELETE /students/:id -> Objectif : Supprimer un étudiant
+router.delete('/:id', (req, res) => {
+  const paramId = parseInt(req.params.id);
+  
+  if (isNaN(paramId)) {
+    return res.status(400).json({ erreur: "L'ID doit être un nombre valide" });
+  }
+
+  const studentIndex = students.findIndex(s => s.id === paramId);
+
+  // Règle 404 : L'ID n'existe pas
+  if (studentIndex === -1) {
+    return res.status(404).json({ erreur: "Étudiant non trouvé" });
+  }
+
+  // Destruction de l'étudiant 
+  students.splice(studentIndex, 1);
+
+  // Code 200 OK + Message
+  res.status(200).json({ message: "Étudiant supprimé avec succès" });
+});
+
+
 
 module.exports = router;
