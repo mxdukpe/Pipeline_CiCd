@@ -18,7 +18,8 @@ function getNextId() {
 
 // Fonction exigée pour réinitialiser les données lors des tests
 function resetData() {
-  students = [...initialStudents];
+  students.length = 0; // On vide le tableau original 
+  students.push(...initialStudents); // On le re-remplit avec les données par défaut
 }
 
 // On exporte tout ça pour que notre API (app.js) puisse y accéder
