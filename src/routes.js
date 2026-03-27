@@ -6,8 +6,9 @@ const { students, getNextId } = require('./data');
 
 // 1. GET /students -> Objectif : Récupérer tous les étudiants
 router.get('/', (req, res) => {
-  res.status(500).json(students); // <-- BUG INTENTIONNEL ICI 🧨
+  res.status(200).json(students); // <-- FIN DU BUG INTENTIONNEL 🩺
 });
+
 
 
 // --- ATTENTION: CES 2 ROUTES DOIVENT ÊTRE AVANT LE /:id ---
